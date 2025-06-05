@@ -19,7 +19,10 @@ class _FirstState extends State<First> {
       body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
-            colors: [Color(0xFFA3BFFA), Color(0xFF4F6EF7)],
+            colors: [
+              Color(0x4D5555ED), 
+              Color(0x4D5555ED), 
+            ],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
           ),

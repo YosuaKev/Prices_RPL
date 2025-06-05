@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'main.dart'; 
 
 class SettingsPage extends StatefulWidget {
   @override
@@ -16,9 +17,10 @@ class _SettingsPageState extends State<SettingsPage> {
       body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
-            colors: [Color(0xFFA3BFFA), Color(0xFF4F6EF7)],
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
+            colors: [
+              Color(0x4D5555ED), 
+              Color(0x4D5555ED), 
+            ],
           ),
         ),
         child: SafeArea(
@@ -34,7 +36,12 @@ class _SettingsPageState extends State<SettingsPage> {
                     // Back button
                     IconButton(
                       icon: const Icon(Icons.arrow_back, color: Colors.white),
-                      onPressed: () => Navigator.pop(context),
+                      onPressed: () {
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(builder: (context) => MainScreen()),
+                          );
+                      },
                     ),
                     const Text(
                       "Settings",
@@ -87,7 +94,7 @@ class _SettingsPageState extends State<SettingsPage> {
                       onChanged: (value) {
                         setState(() => beepOnScan = value);
                       },
-                      activeColor: const Color(0xFF4F6EF7),
+                      activeColor: const Color(0xFF5555ED),
                     ),
 
                     const SizedBox(height: 32),

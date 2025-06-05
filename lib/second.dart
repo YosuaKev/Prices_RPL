@@ -35,7 +35,10 @@ class _SecondState extends State<Second> {
       body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
-            colors: [Color(0xFFA3BFFA), Color(0xFF4F6EF7)],
+            colors: [
+            Color(0x4D5555ED), 
+            Color(0x4D5555ED), 
+            ],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
           ),
@@ -70,15 +73,13 @@ class _SecondState extends State<Second> {
                           size: 80, color: Colors.white70),
                     ),
                   ),
-
                   const SizedBox(height: 30),
 
                   // Scan Button
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.amber[700],
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 32, vertical: 14),
+                      padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 14),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10),
                       ),
@@ -89,27 +90,7 @@ class _SecondState extends State<Second> {
                       style: TextStyle(color: Colors.white),
                     ),
                   ),
-
                   const SizedBox(height: 30),
-
-                  // Result Display
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.9),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Text(
-                      scanResult.isEmpty
-                          ? 'Scan result will appear here'
-                          : scanResult,
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        color: Colors.black87,
-                      ),
-                    ),
-                  ),
                 ],
               ),
             ),

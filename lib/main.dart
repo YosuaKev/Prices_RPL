@@ -63,7 +63,7 @@ class _MainScreenState extends State<MainScreen> {
             onTap: (index) {
               setState(() => _currentIndex = index);
             },
-            backgroundColor: Colors.white.withOpacity(0.2),
+            backgroundColor: const Color(0xE66D79DD),
             selectedItemColor: Colors.white,
             unselectedItemColor: Colors.white70,
             items: const [
@@ -90,28 +90,49 @@ class _MainScreenState extends State<MainScreen> {
 class Home extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final double tabBarHeight = kBottomNavigationBarHeight;
+
     return DefaultTabController(
       length: 2,
       child: Scaffold(
         backgroundColor: Colors.transparent,
-        appBar: AppBar(
-          backgroundColor: Colors.white.withOpacity(0.2),
-          title: const Text('Home Screen'),
-          centerTitle: true,
-          actions: [
-            IconButton(
-              icon: const Icon(Icons.flash_on),
-              onPressed: () {
-                // Tambahkan logika flashlight jika dibutuhkan
-              },
+        appBar: PreferredSize(
+          preferredSize: Size.fromHeight(tabBarHeight + 10),
+          child: SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  Container(
+                    height: kBottomNavigationBarHeight,
+                    color: Color(0xE66D79DD),
+                    child: TabBar(
+                      indicatorColor: Colors.white,
+                      labelColor: Colors.white,
+                      unselectedLabelColor: Colors.white70,
+                      indicatorWeight: 3,
+                      labelStyle: TextStyle(fontSize: 12),
+                      tabs: const [
+                        Tab(icon: Icon(Icons.qr_code), text: 'Generator'),
+                        Tab(icon: Icon(Icons.camera_alt), text: 'Scanner'),
+                      ],
+                    ),
+                  ),
+                  // Tombol flash di tengah horizontal
+                  Positioned(
+                    right: null,
+                    left: null,
+                    child: IconButton(
+                      onPressed: () {
+                        // aksi saat tombol flash ditekan
+                      },
+                      icon: Icon(Icons.flash_on, color: Colors.white),
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ],
-          bottom: const TabBar(
-            indicatorColor: Colors.white,
-            tabs: [
-              Tab(icon: Icon(Icons.qr_code), text: 'Generator'),
-              Tab(icon: Icon(Icons.camera_alt), text: 'Scanner'),
-            ],
           ),
         ),
         body: const TabBarView(
