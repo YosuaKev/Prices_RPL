@@ -1,67 +1,114 @@
-import 'dart:io';
-
-import 'package:barcode_widget/barcode_widget.dart';
 import 'package:flutter/material.dart';
+import 'package:barcode_widget/barcode_widget.dart';
 
 class First extends StatefulWidget {
-  const First({Key? key}) : super(key: key);
+  const First({super.key});
 
   @override
-  State<First> createState() => FirstState();
+  State<First> createState() => _FirstState();
 }
 
-class FirstState extends State<First> {
-  TextEditingController title = TextEditingController();
-  TextEditingController content = TextEditingController();
-  var code = '';
-  File? file;
+class _FirstState extends State<First> {
+  TextEditingController controller = TextEditingController();
+  String code = '';
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Center(
-        child: SingleChildScrollView(
-          child: Column(
-            children: [
-            
-              Padding(
-                padding: EdgeInsets.all(35),
-                child: Container(
-                  decoration: BoxDecoration(border: Border.all()),
-                  child: TextFormField(
-                    controller: title,
+      backgroundColor: Colors.transparent,
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Color(0xFFA3BFFA), Color(0xFF4F6EF7)],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
+        ),
+        child: SafeArea(
+          child: Center(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: Column(
+                children: [
+                  const Text(
+                    "Generate QR Code",
+                    style: TextStyle(
+                      fontSize: 22,
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+
+                  // Input Field
+                  TextField(
+                    controller: controller,
                     textAlign: TextAlign.center,
+                    style: const TextStyle(color: Colors.black),
                     decoration: InputDecoration(
-                      hintText: ' Code ',
-                    ),
-                  ),
-                ),
-              ),
-              MaterialButton(
-                color: Colors.indigo,
-                onPressed: () {
-                  setState(() {
-                    code = title.text;
-                  });
-                },
-                child: Text(
-                  "Create",
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 20,
-                  ),
-                ),
-              ),
-              code == ''
-                  ? Text('')
-                  : BarcodeWidget(
-                      barcode: Barcode.qrCode(
-                        errorCorrectLevel: BarcodeQRCorrectionLevel.high,
+                      hintText: 'Enter text or code',
+                      hintStyle: const TextStyle(color: Colors.black45),
+                      filled: true,
+                      fillColor: Colors.white.withOpacity(0.9),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
                       ),
-                      data: '$code',
-                      width: 200,
-                      height: 200,
                     ),
-            ],
+                  ),
+
+                  const SizedBox(height: 16),
+
+                  // Generate Button
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.amber[700],
+                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        code = controller.text.trim();
+                      });
+                    },
+                    child: const Text(
+                      "Create QR Code",
+                      style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+
+                  const SizedBox(height: 32),
+
+                  // QR Code Preview
+                  code.isNotEmpty
+                      ? Container(
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(16),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black26,
+                                blurRadius: 8,
+                                offset: Offset(0, 4),
+                              ),
+                            ],
+                          ),
+                          child: BarcodeWidget(
+                            barcode: Barcode.qrCode(),
+                            data: code,
+                            width: 200,
+                            height: 200,
+                          ),
+                        )
+                      : const Text(
+                          'Enter code and press "Create"',
+                          style: TextStyle(color: Colors.white70),
+                        ),
+                ],
+              ),
+            ),
           ),
         ),
       ),
