@@ -66,9 +66,15 @@ class _ResultPageState extends State<ResultPage> {
           if (index == 1) {
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (_) => SettingsPage()),
+              MaterialPageRoute(
+                builder: (_) => SettingsPage(
+                  onBackToHome: () {
+                    Navigator.pop(context);
+                  },
+                ),
+              ),
             );
-          }
+          };
         },
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.history), label: 'History'),

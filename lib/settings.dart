@@ -1,7 +1,14 @@
 import 'package:flutter/material.dart';
-import 'main.dart'; 
+import 'package:vibration/vibration.dart';
+import 'package:audioplayers/audioplayers.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class SettingsPage extends StatefulWidget {
+  final VoidCallback onBackToHome;
+
+  const SettingsPage({Key? key, required this.onBackToHome}) : super(key: key);
+
   @override
   _SettingsPageState createState() => _SettingsPageState();
 }
@@ -9,6 +16,31 @@ class SettingsPage extends StatefulWidget {
 class _SettingsPageState extends State<SettingsPage> {
   bool vibrateOnScan = true;
   bool beepOnScan = false;
+
+  final AudioPlayer _audioPlayer = AudioPlayer();
+
+  // Fungsi simulasi scan selesai
+  void _onScanDone() async {
+    if (vibrateOnScan) {
+      if (await Vibration.hasVibrator() ?? false) {
+        Vibration.vibrate(duration: 100);
+      }
+    }
+
+    if (beepOnScan) {
+      await _audioPlayer.play(AssetSource('beep_sound.mp3'));
+    }
+  }
+
+  // Fungsi membuka URL di browser (Rate Us, Privacy Policy)
+  Future<void> _launchURL(String url) async {
+    final uri = Uri.parse(url);
+    if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Could not open $url')),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -18,8 +50,8 @@ class _SettingsPageState extends State<SettingsPage> {
         decoration: const BoxDecoration(
           gradient: LinearGradient(
             colors: [
-              Color(0x4D5555ED), 
-              Color(0x4D5555ED), 
+              Color(0x4D5555ED),
+              Color(0x4D5555ED),
             ],
           ),
         ),
@@ -29,7 +61,8 @@ class _SettingsPageState extends State<SettingsPage> {
             children: [
               // Header
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -37,10 +70,7 @@ class _SettingsPageState extends State<SettingsPage> {
                     IconButton(
                       icon: const Icon(Icons.arrow_back, color: Colors.white),
                       onPressed: () {
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(builder: (context) => MainScreen()),
-                          );
+                        widget.onBackToHome();
                       },
                     ),
                     const Text(
@@ -97,7 +127,7 @@ class _SettingsPageState extends State<SettingsPage> {
                       activeColor: const Color(0xFF5555ED),
                     ),
 
-                    const SizedBox(height: 32),
+                    const SizedBox(height: 24),
 
                     const Text(
                       "SUPPORT",
@@ -112,35 +142,43 @@ class _SettingsPageState extends State<SettingsPage> {
                     // Rate Us
                     ListTile(
                       leading: const Icon(Icons.star, color: Colors.white),
-                      title: const Text("Rate Us", style: TextStyle(color: Colors.white)),
+                      title:
+                          const Text("Rate Us", style: TextStyle(color: Colors.white)),
                       subtitle: Text(
                         "Your best reward to us",
                         style: TextStyle(color: Colors.grey[300], fontSize: 12),
                       ),
                       onTap: () {
-                        // TODO: Implement rating functionality
+                        // Contoh link Play Store
+                        _launchURL('https://play.google.com/store/apps/details?id=com.example.app');
                       },
                     ),
 
                     // Share
                     ListTile(
                       leading: const Icon(Icons.share, color: Colors.white),
-                      title: const Text("Share app with others", style: TextStyle(color: Colors.white)),
+                      title: const Text("Share app with others",
+                          style: TextStyle(color: Colors.white)),
                       onTap: () {
-                        // TODO: Implement share functionality
+                        Share.share(
+                          'Hey, coba aplikasi ini: https://play.google.com/store/apps/details?id=com.example.app',
+                          subject: 'Check out this app!',
+                        );
                       },
                     ),
 
                     // Privacy Policy
                     ListTile(
                       leading: const Icon(Icons.description, color: Colors.white),
-                      title: const Text("Privacy Policy", style: TextStyle(color: Colors.white)),
+                      title:
+                          const Text("Privacy Policy", style: TextStyle(color: Colors.white)),
                       subtitle: Text(
                         "We care about your privacy",
                         style: TextStyle(color: Colors.grey[300], fontSize: 12),
                       ),
                       onTap: () {
-                        // TODO: Show privacy policy
+                        // Contoh link Privacy Policy
+                        _launchURL('https://www.example.com/privacy-policy');
                       },
                     ),
                   ],
