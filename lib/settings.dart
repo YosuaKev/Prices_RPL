@@ -48,12 +48,7 @@ class _SettingsPageState extends State<SettingsPage> {
       backgroundColor: Colors.transparent,
       body: Container(
         decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            colors: [
-              Color(0x4D5555ED),
-              Color(0x4D5555ED),
-            ],
-          ),
+
         ),
         child: SafeArea(
           child: Column(
@@ -89,7 +84,7 @@ class _SettingsPageState extends State<SettingsPage> {
               // Settings list
               Expanded(
                 child: ListView(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 32),
                   children: [
                     const Text(
                       "GENERAL SETTINGS",

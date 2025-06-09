@@ -20,7 +20,6 @@ class _HistoryPageState extends State<HistoryPage> {
     _loadHistory();
   }
 
-  // ✅ Muat history dari SharedPreferences
   Future<void> _loadHistory() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? savedData = prefs.getString('history');
@@ -99,11 +98,7 @@ class _HistoryPageState extends State<HistoryPage> {
     return Scaffold(
       body: Container(
         decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            colors: [Color(0x4D5555ED), Color(0x4D5555ED)],
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-          ),
+
         ),
         child: SafeArea(
           child: Column(
