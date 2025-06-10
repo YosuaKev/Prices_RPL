@@ -31,14 +31,12 @@ class _HistoryPageState extends State<HistoryPage> {
     }
   }
 
-  // ✅ Simpan history ke SharedPreferences
   Future<void> _saveHistory() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String encoded = jsonEncode(history);
     await prefs.setString('history', encoded);
   }
 
-  // ✅ Tambahkan data baru ke history
   Future<void> _addToHistory(String url) async {
     final now = DateTime.now();
     final timestamp = "${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')} "

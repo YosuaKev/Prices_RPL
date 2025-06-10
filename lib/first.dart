@@ -13,16 +13,13 @@ class _FirstState extends State<First> {
 
   @override
   void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      scanCode();
-    });
+    super.initState(); 
   }
 
   Future<void> scanCode() async {
     try {
       String result = await FlutterBarcodeScanner.scanBarcode(
-          '#FF6666', 'Cancel', true, ScanMode.BARCODE);
+        '#FF6666', 'Cancel', true, ScanMode.BARCODE);
 
       if (!mounted) return;
 
@@ -41,9 +38,7 @@ class _FirstState extends State<First> {
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: Container(
-        decoration: const BoxDecoration(
-          
-        ),
+        decoration: const BoxDecoration(),
         child: SafeArea(
           child: Center(
             child: SingleChildScrollView(
@@ -52,16 +47,15 @@ class _FirstState extends State<First> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   const Text(
-                    "Scan Barcode / QR Code",
+                    "Scan Barcode",
                     style: TextStyle(
-                      fontSize: 22,
+                      fontSize: 30,
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                   const SizedBox(height: 30),
 
-                  // Scan Box Placeholder
                   Container(
                     width: 250,
                     height: 250,
@@ -76,13 +70,19 @@ class _FirstState extends State<First> {
                   ),
                   const SizedBox(height: 30),
 
-                  // Tombol scan dihapus jadi tidak ada
-
-                  // Display scan result
-                  Text(
-                    scanResult.isEmpty ? 'Scan result will appear here' : scanResult,
-                    style: const TextStyle(color: Colors.white70, fontSize: 16),
-                    textAlign: TextAlign.center,
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.indigo[300],
+                      padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 14),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                    onPressed: scanCode,
+                    child: const Text(
+                      'START SCAN',
+                      style: TextStyle(color: Colors.white),
+                    ),
                   ),
                 ],
               ),

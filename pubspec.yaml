@@ -22,13 +22,19 @@ dependencies:
   audioplayers: ^5.2.1     
   share_plus: ^7.2.1       
   url_launcher: ^6.2.5
-  flashlight_flutter: ^1.0.4     
+  google_ml_kit: ^0.20.0  
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^5.0.0
   flutter_launcher_icons: ^0.13.1
+
+dependency_overrides:
+  google_mlkit_barcode_scanning:
+    git:
+      url: https://github.com/bharat-biradar/Google-Ml-Kit-plugin.git
+      path: packages/google_mlkit_barcode_scanning
 
 flutter_launcher_icons:
   android: true

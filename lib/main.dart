@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:google_ml_kit/google_ml_kit.dart';
 import 'dart:ui';
 import 'first.dart';
 import 'settings.dart';
@@ -113,22 +115,38 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
+  
   late TabController _tabController;
 
   bool _isHoveringTab0 = false;
-  bool _isHoveringFlash = false;
+  bool _isHoveringTab1 = false;
 
-  bool _isFlashOn = false;
 
-  void _toggleFlash() async {
-    try {
-      setState(() {
-        _isFlashOn = !_isFlashOn;
-      });
-    } catch (e) {
-      print("Torch error: $e");
+  Future<void> _pickImageAndScanBarcode() async {
+  final pickedFile = await ImagePicker().pickImage(source: ImageSource.gallery);
+
+  if (pickedFile != null) {
+    final inputImage = InputImage.fromFilePath(pickedFile.path);
+    final barcodeScanner = GoogleMlKit.vision.barcodeScanner();
+
+    final List<Barcode> barcodes = await barcodeScanner.processImage(inputImage);
+
+    for (Barcode barcode in barcodes) {
+      final String value = barcode.rawValue ?? '';
+      print('Barcode value: $value');
+      // Kamu bisa tampilkan hasil ini ke UI
+      showDialog(
+        context: context,
+        builder: (_) => AlertDialog(
+          title: Text("Barcode Detected"),
+          content: Text(value),
+        ),
+      );
     }
+
+    await barcodeScanner.close();
   }
+}
 
   @override
   void initState() {
@@ -146,14 +164,14 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        SizedBox(height: 40),
+        SizedBox(height: 70),
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 50.0),
+          padding: const EdgeInsets.symmetric(horizontal: 50.0,),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(20),
             child: Container(
               height: 45,
-              width: 200,
+              width: 140,
               decoration: BoxDecoration(
                 color: const Color(0x556D79DD),
                 borderRadius: BorderRadius.circular(20),
@@ -178,7 +196,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                               borderRadius: BorderRadius.circular(12),
                             ),
                             child: Icon(
-                              Icons.collections,
+                              Icons.qr_code,
                               color: _tabController.index == 0 ? Colors.white : Colors.white60,
                             ),
                           ),
@@ -189,20 +207,20 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                   Expanded(
                     child: Center(
                       child: MouseRegion(
-                        onEnter: (_) => setState(() => _isHoveringFlash = true),
-                        onExit: (_) => setState(() => _isHoveringFlash = false),
+                        onEnter: (_) => setState(() => _isHoveringTab1 = true),
+                        onExit: (_) => setState(() => _isHoveringTab1 = false),
                         child: GestureDetector(
-                          onTap: _toggleFlash,
+                          onTap: _pickImageAndScanBarcode,
                           child: Container(
                             width: 40,
                             height: 40,
                             decoration: BoxDecoration(
-                              color: _isHoveringFlash ? Colors.white24 : Colors.transparent,
+                              color: _isHoveringTab1 ? Colors.white24 : Colors.transparent,
                               borderRadius: BorderRadius.circular(12),
                             ),
                             child: Icon(
-                              Icons.flash_on,
-                              color: _isHoveringFlash ? Colors.white : Colors.white60,
+                              Icons.photo_library,
+                              color: _isHoveringTab1 ? Colors.white : Colors.white60,
                             ),
                           ),
                         ),
