@@ -1,214 +1,256 @@
 import 'package:flutter/material.dart';
-import 'settings.dart';
+import 'package:flutter/services.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
+import 'dart:ui';
 
 class ResultPage extends StatefulWidget {
   final String barcodeValue;
+  final String? price;
+  final DateTime scanTime;
+  final String? productName;
 
-  const ResultPage({super.key, required this.barcodeValue});
+  ResultPage({
+    required this.barcodeValue,
+    this.price,
+    required this.scanTime,
+    this.productName,
+  });
 
   @override
-  State<ResultPage> createState() => _ResultPageState();
+  _ResultPageState createState() => _ResultPageState();
 }
 
 class _ResultPageState extends State<ResultPage> {
-  late String productName;
+  String productName = '';
 
   @override
   void initState() {
     super.initState();
-    productName = widget.barcodeValue;
+    productName = widget.productName ?? '';
+    saveToHistory(widget.barcodeValue); 
   }
 
-  void _renameProduct() {
-    TextEditingController controller = TextEditingController(text: productName);
+  Future<void> saveToHistory(String scannedUrl) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? savedData = prefs.getString('history');
+
+    List<Map<String, String>> currentHistory = [];
+
+    if (savedData != null) {
+      List<dynamic> jsonList = jsonDecode(savedData);
+      currentHistory = jsonList.map((e) => Map<String, String>.from(e)).toList();
+    }
+
+    currentHistory.add({
+      'url': scannedUrl,
+      'timestamp': DateTime.now().toString(),
+    });
+
+    await prefs.setString('history', jsonEncode(currentHistory));
+  }
+
+  String get displayProductName {
+    return productName.isNotEmpty ? productName : widget.barcodeValue;
+  }
+
+  void _showRenameDialog() {
+    TextEditingController controller = TextEditingController(text: displayProductName);
     showDialog(
       context: context,
-      builder: (context) {
-        return AlertDialog(
-          backgroundColor: const Color(0xFFEEF1FF),
-          title: const Text(
-            "Rename",
-            style: TextStyle(fontWeight: FontWeight.bold),
+      builder: (context) => AlertDialog(
+        backgroundColor: Color(0xFFA3BFFA),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+        title: Text("Rename", style: TextStyle(color: Colors.white)),
+        content: TextField(
+          controller: controller,
+          style: TextStyle(color: Colors.white),
+          decoration: InputDecoration(
+            filled: true,
+            fillColor: Colors.white.withOpacity(0.2),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(10),
+              borderSide: BorderSide.none,
+            ),
           ),
-          content: TextField(controller: controller),
-          actions: [
-            TextButton(
-              child: const Text("Cancel"),
-              onPressed: () => Navigator.of(context).pop(),
-            ),
-            TextButton(
-              child: const Text(
-                "OK",
-                style: TextStyle(color: Color(0xFF4F6EF7)),
-              ),
-              onPressed: () {
-                setState(() {
-                  productName = controller.text;
-                });
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text("Cancel", style: TextStyle(color: Colors.white)),
+            style: TextButton.styleFrom(backgroundColor: Color(0xFFB0BEC5)),
+          ),
+          TextButton(
+            onPressed: () {
+              setState(() {
+                productName = controller.text;
+              });
+              Navigator.pop(context);
+            },
+            child: Text("OK", style: TextStyle(color: Colors.white)),
+            style: TextButton.styleFrom(backgroundColor: Color(0xFF4F6EF7)),
+          ),
+        ],
+      ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: 0,
-        backgroundColor: Colors.white,
-        selectedItemColor: const Color(0xFF4F6EF7),
-        unselectedItemColor: Colors.grey,
-        onTap: (index) {
-          if (index == 1) {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => SettingsPage(
-                  onBackToHome: () {
-                    Navigator.pop(context);
-                  },
-                ),
-              ),
-            );
-          };
-        },
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.history), label: 'History'),
-          BottomNavigationBarItem(icon: Icon(Icons.settings), label: 'Settings'),
-        ],
-      ),
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            colors: [Color(0xFFA3BFFA), Color(0xFF4F6EF7)],
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
+    return Stack(
+      children: [
+        Positioned.fill(
+          child: Image.asset(
+            'assets/homeScreenbackground.jpg',
+            fit: BoxFit.cover,
           ),
         ),
-        child: SafeArea(
-          child: Column(
-            children: [
-              Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Icon(Icons.arrow_back, color: Colors.white),
-                    const Text(
-                      'Result',
-                      style: TextStyle(
+        Positioned.fill(
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
+            child: Container(color: Color(0x556D79DD)),
+          ),
+        ),
+        Scaffold(
+          backgroundColor: Colors.transparent,
+          body: SafeArea(
+            child: Column(
+              children: [
+                Padding(
+                  padding: EdgeInsets.all(16.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      IconButton(
+                        icon: Icon(Icons.arrow_back, color: Colors.white),
+                        onPressed: () => Navigator.pop(context),
+                      ),
+                      Text(
+                        "Result",
+                        style: TextStyle(
                           color: Colors.white,
                           fontSize: 20,
-                          fontWeight: FontWeight.bold),
-                    ),
-                    const SizedBox(width: 48),
-                  ],
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      SizedBox(width: 48),
+                    ],
+                  ),
                 ),
-              ),
-              Expanded(
-                child: Center(
-                  child: Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 24),
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF6D88F5),
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Row(
-                          children: [
-                            const Icon(Icons.qr_code,
-                                color: Colors.white, size: 32),
-                            const SizedBox(width: 8),
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: const [
-                                Text(
-                                  'Product',
-                                  style: TextStyle(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.bold),
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 16.0),
+                  child: Column(
+                    children: [
+                      Text(
+                        "Product",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      SizedBox(height: 4),
+                      Text(
+                        _formatDateTime(widget.scanTime),
+                        style: TextStyle(color: Colors.grey[300], fontSize: 12),
+                      ),
+                      SizedBox(height: 20),
+                      GestureDetector(
+                        onTap: _showRenameDialog,
+                        child: Container(
+                          padding: EdgeInsets.all(16.0),
+                          decoration: BoxDecoration(
+                            color: Color(0x80A3BFFA),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Column(
+                            children: [
+                              Text(
+                                displayProductName,
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
                                 ),
+                              ),
+                              if (widget.price != null && widget.price!.isNotEmpty) ...[
+                                SizedBox(height: 8),
                                 Text(
-                                  '16 Dec 2022, 9:30 pm',
+                                  widget.price!,
                                   style: TextStyle(
                                     color: Colors.white,
-                                    fontSize: 12,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
                                   ),
                                 ),
                               ],
+                              SizedBox(height: 8),
+                              Text(
+                                widget.barcodeValue,
+                                style: TextStyle(
+                                  color: Colors.grey[300],
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      SizedBox(height: 16),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          IconButton(
+                            icon: Icon(Icons.share, color: Colors.white),
+                            onPressed: () {
+                              Share.share(
+                                "${displayProductName}\n${widget.barcodeValue}\n${widget.price ?? 'Harga tidak tersedia'}",
+                              );
+                            },
+                            style: IconButton.styleFrom(
+                              backgroundColor: Color(0x80A3BFFA),
                             ),
-                            const Spacer(),
-                            IconButton(
-                              icon: const Icon(Icons.edit, color: Colors.white),
-                              onPressed: _renameProduct,
+                          ),
+                          SizedBox(width: 16),
+                          IconButton(
+                            icon: Icon(Icons.copy, color: Colors.white),
+                            onPressed: () {
+                              Clipboard.setData(ClipboardData(
+                                text: "${displayProductName}\n${widget.barcodeValue}\n${widget.price ?? 'Harga tidak tersedia'}",
+                              ));
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text('Disalin ke clipboard')),
+                              );
+                            },
+                            style: IconButton.styleFrom(
+                              backgroundColor: Color(0x80A3BFFA),
                             ),
-                          ],
-                        ),
-                        const SizedBox(height: 12),
-                        const Divider(color: Colors.white70),
-                        const SizedBox(height: 12),
-                        Text(
-                          productName,
-                          style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold),
-                        ),
-                        const SizedBox(height: 8),
-                        const Text(
-                          'Rp 99.999,99',
-                          style: TextStyle(
-                              color: Colors.white, fontWeight: FontWeight.w500),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          'Code: ${widget.barcodeValue}',
-                          style: const TextStyle(
-                              color: Colors.white70, fontSize: 12),
-                        ),
-                      ],
-                    ),
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
                 ),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(bottom: 24),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    ElevatedButton.icon(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.white,
-                        foregroundColor: const Color(0xFF4F6EF7),
-                      ),
-                      icon: const Icon(Icons.share),
-                      label: const Text('Share'),
-                      onPressed: () {},
-                    ),
-                    ElevatedButton.icon(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.white,
-                        foregroundColor: const Color(0xFF4F6EF7),
-                      ),
-                      icon: const Icon(Icons.copy),
-                      label: const Text('Copy'),
-                      onPressed: () {},
-                    ),
-                  ],
-                ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
-      ),
+      ],
     );
+  }
+
+  String _formatDateTime(DateTime dt) {
+    return "${dt.day.toString().padLeft(2, '0')} "
+        "${_monthName(dt.month)} ${dt.year} - "
+        "${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}";
+  }
+
+  String _monthName(int month) {
+    const months = [
+      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+    ];
+    return months[month - 1];
   }
 }

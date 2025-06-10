@@ -5,6 +5,7 @@ import 'dart:ui';
 import 'first.dart';
 import 'settings.dart';
 import 'history.dart';
+import 'result_page.dart';
 
 void main() {
   runApp(MyApp());
@@ -18,23 +19,20 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       home: Stack(
         children: [
-          // Background Image
           Positioned.fill(
             child: Image.asset(
               'assets/homeScreenbackground.jpg',
               fit: BoxFit.cover,
             ),
           ),
-          // Blur + Color overlay utama
-        Positioned.fill(
-          child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
-            child: Container(
-              color: const Color(0x556D79DD), 
+          Positioned.fill(
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
+              child: Container(
+                color: const Color(0x556D79DD),
+              ),
             ),
           ),
-        ),
-          // App content
           MainScreen(),
         ],
       ),
@@ -73,34 +71,40 @@ class _MainScreenState extends State<MainScreen> {
       backgroundColor: Colors.transparent,
       body: _tabs[_currentIndex],
       bottomNavigationBar: Padding(
-        padding: const EdgeInsets.only(left: 0.0, right: 0.0, bottom: 0.0),
+        padding: const EdgeInsets.symmetric(),
         child: ClipRRect(
-          borderRadius: BorderRadius.circular(0),
           child: BackdropFilter(
             filter: ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
-            child: BottomNavigationBar(
-              currentIndex: _currentIndex,
-              onTap: (index) {
-                setState(() => _currentIndex = index);
-              },
-              backgroundColor: const Color(0x556D79DD),
-              selectedItemColor: Colors.white,
-              unselectedItemColor: Colors.white60,
-              elevation: 10,
-              items: const [
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.history),
-                  label: 'History',
-                ),
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.qr_code_scanner),
-                  label: 'Scanner',
-                ),
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.settings),
-                  label: 'Settings',
-                ),
-              ],
+            child: Container(
+              height: 70,
+              decoration: BoxDecoration(
+                color: const Color(0x556D79DD),
+              ),
+              child: BottomNavigationBar(
+                currentIndex: _currentIndex,
+                onTap: (index) {
+                  setState(() => _currentIndex = index);
+                },
+                backgroundColor: Colors.transparent,
+                selectedItemColor: Colors.white,
+                unselectedItemColor: Colors.white60,
+                elevation: 0,
+                type: BottomNavigationBarType.fixed,
+                items: const [
+                  BottomNavigationBarItem(
+                    icon: Icon(Icons.history),
+                    label: 'History',
+                  ),
+                  BottomNavigationBarItem(
+                    icon: Icon(Icons.qr_code_scanner),
+                    label: 'Scanner',
+                  ),
+                  BottomNavigationBarItem(
+                    icon: Icon(Icons.settings),
+                    label: 'Settings',
+                  ),
+                ],
+              ),
             ),
           ),
         ),
@@ -115,38 +119,49 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
-  
   late TabController _tabController;
 
   bool _isHoveringTab0 = false;
   bool _isHoveringTab1 = false;
 
+  // Tambahkan fungsi lookupPrice di sini
+  double? lookupPrice(String barcode) {
+    Map<String, double> priceDatabase = {
+      '1234567890': 15.0,
+      '9876543210': 25.0,
+      '1111111111': 30.0,
+    };
+    return priceDatabase[barcode]; // akan return null jika tidak ditemukan
+  }
 
   Future<void> _pickImageAndScanBarcode() async {
-  final pickedFile = await ImagePicker().pickImage(source: ImageSource.gallery);
+    final pickedFile = await ImagePicker().pickImage(source: ImageSource.gallery);
 
-  if (pickedFile != null) {
-    final inputImage = InputImage.fromFilePath(pickedFile.path);
-    final barcodeScanner = GoogleMlKit.vision.barcodeScanner();
+    if (pickedFile != null) {
+      final inputImage = InputImage.fromFilePath(pickedFile.path);
+      final barcodeScanner = GoogleMlKit.vision.barcodeScanner();
 
-    final List<Barcode> barcodes = await barcodeScanner.processImage(inputImage);
+      final List<Barcode> barcodes = await barcodeScanner.processImage(inputImage);
 
-    for (Barcode barcode in barcodes) {
-      final String value = barcode.rawValue ?? '';
-      print('Barcode value: $value');
-      // Kamu bisa tampilkan hasil ini ke UI
-      showDialog(
-        context: context,
-        builder: (_) => AlertDialog(
-          title: Text("Barcode Detected"),
-          content: Text(value),
-        ),
-      );
+      for (Barcode barcode in barcodes) {
+        final String value = barcode.rawValue ?? '';
+        print('Barcode value: $value');
+
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => ResultPage(
+              barcodeValue: value,
+              price: lookupPrice(value)?.toString(),
+              scanTime: DateTime.now(),
+            ),
+          ),
+        );
+      }
+
+      await barcodeScanner.close();
     }
-
-    await barcodeScanner.close();
   }
-}
 
   @override
   void initState() {
@@ -166,7 +181,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
       children: [
         SizedBox(height: 70),
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 50.0,),
+          padding: const EdgeInsets.symmetric(horizontal: 50.0),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(20),
             child: Container(

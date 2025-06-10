@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:vibration/vibration.dart';
-import 'package:audioplayers/audioplayers.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -15,24 +13,8 @@ class SettingsPage extends StatefulWidget {
 
 class _SettingsPageState extends State<SettingsPage> {
   bool vibrateOnScan = true;
-  bool beepOnScan = false;
+  bool beepOnScan = true;
 
-  final AudioPlayer _audioPlayer = AudioPlayer();
-
-  // Fungsi simulasi scan selesai
-  void _onScanDone() async {
-    if (vibrateOnScan) {
-      if (await Vibration.hasVibrator() ?? false) {
-        Vibration.vibrate(duration: 100);
-      }
-    }
-
-    if (beepOnScan) {
-      await _audioPlayer.play(AssetSource('beep_sound.mp3'));
-    }
-  }
-
-  // Fungsi membuka URL di browser (Rate Us, Privacy Policy)
   Future<void> _launchURL(String url) async {
     final uri = Uri.parse(url);
     if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {

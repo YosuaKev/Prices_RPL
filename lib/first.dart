@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_barcode_scanner_plus/flutter_barcode_scanner_plus.dart';
+import 'result_page.dart';
+import 'package:vibration/vibration.dart';
+import 'package:audioplayers/audioplayers.dart';
 
 class First extends StatefulWidget {
   const First({super.key});
@@ -9,12 +12,33 @@ class First extends StatefulWidget {
 }
 
 class _FirstState extends State<First> {
-  String scanResult = '';
+  double? lookupPrice(String barcode) {
+  const productPrices = {
+    '1234567890': 10.99,
+    '0987654321': 5.49,
+    '1122334455': 7.25,
+  };
 
-  @override
-  void initState() {
-    super.initState(); 
+  return productPrices[barcode];
+}
+
+  final AudioPlayer _audioPlayer = AudioPlayer();
+
+  Future<void> onScanDone() async {
+    if (await Vibration.hasVibrator()) {
+      Vibration.vibrate(duration: 100);
+    }
+
+    await _audioPlayer.play(AssetSource('beep_sound.mp3'));
   }
+
+  void _showScanFinishedMessage() {
+    setState(() {
+      scanResult = 'Scan selesai!';
+    });
+  }
+
+  String scanResult = '';
 
   Future<void> scanCode() async {
     try {
@@ -23,12 +47,29 @@ class _FirstState extends State<First> {
 
       if (!mounted) return;
 
-      setState(() {
-        scanResult = result == '-1' ? 'Cancelled' : result;
-      });
+      if (result != '-1') {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => ResultPage(
+               barcodeValue: result,
+               price: lookupPrice(result)?.toString(), 
+               scanTime: DateTime.now(),
+            ),
+          ),
+        );
+        
+        await onScanDone();
+        _showScanFinishedMessage();
+
+      } else {
+        setState(() {
+          scanResult = 'Cancelled';
+        });
+      }
     } catch (e) {
       setState(() {
-        scanResult = 'Error occurred while scanning';
+        scanResult = 'Error: $e';
       });
     }
   }
@@ -55,7 +96,7 @@ class _FirstState extends State<First> {
                     ),
                   ),
                   const SizedBox(height: 30),
-
+                  
                   Container(
                     width: 250,
                     height: 250,
@@ -83,6 +124,11 @@ class _FirstState extends State<First> {
                       'START SCAN',
                       style: TextStyle(color: Colors.white),
                     ),
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    scanResult,
+                    style: const TextStyle(color: Colors.white70),
                   ),
                 ],
               ),
