@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'dart:ui';
+import 'products.dart';
 
 class ResultPage extends StatefulWidget {
   final String barcodeValue;
@@ -12,7 +13,7 @@ class ResultPage extends StatefulWidget {
   final String? productName;
   final String? price;
 
-  ResultPage({
+  const ResultPage({super.key, 
     required this.barcodeValue,
     required this.scanTime,
     this.productName,
@@ -32,33 +33,41 @@ class _ResultPageState extends State<ResultPage> {
     super.initState();
     productName = widget.productName ?? '';
     productPrice = widget.price;
-    saveToHistory();
     fetchProductDetails();
   }
 
   Future<void> fetchProductDetails() async {
-    final barcode = widget.barcodeValue;
-    try {
-      final response = await http.get(
-        Uri.parse('http://10.0.2.2:8000/api/products/$barcode'),
-      );
+  final barcode = widget.barcodeValue;
+  try {
+    final response = await http.get(
+      Uri.parse('http://192.168.120.55:8000/api/products/barcode/$barcode'),
+    );
 
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
+    print("Status: ${response.statusCode}");
+    print("Body: ${response.body}");
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      final product = Product.fromJson(data);
+
+      if (mounted) {
         setState(() {
-          productName = data['name'] ?? barcode;
-          productPrice = data['price'] != null
-                ? data['price'].toString()
-                : productPrice;
+          productName = product.name.isNotEmpty ? product.name : barcode;
+          productPrice = product.price;
         });
-        saveToHistory(); // update history with fetched data
-      } else {
-        print('Produk tidak ditemukan, status: ${response.statusCode}');
+
+        await saveToHistory();
       }
-    } catch (e) {
-      print('Gagal mengambil data produk: $e');
+
+      saveToHistory();
+    } else {
+      print('Produk tidak ditemukan, status: ${response.statusCode}');
     }
+  } catch (e) {
+    print('Gagal mengambil data produk: $e');
   }
+}
+
 
   Future<void> saveToHistory() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -111,9 +120,9 @@ class _ResultPageState extends State<ResultPage> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text("Cancel", style: TextStyle(color: Colors.white)),
             style: TextButton.styleFrom(
                 backgroundColor: Color(0xFFB0BEC5)),
+            child: Text("Cancel", style: TextStyle(color: Colors.white)),
           ),
           TextButton(
             onPressed: () {
@@ -123,9 +132,9 @@ class _ResultPageState extends State<ResultPage> {
               saveToHistory();
               Navigator.pop(context);
             },
-            child: Text("OK", style: TextStyle(color: Colors.white)),
             style: TextButton.styleFrom(
                 backgroundColor: Color(0xFF4F6EF7)),
+            child: Text("OK", style: TextStyle(color: Colors.white)),
           ),
         ],
       ),

@@ -1,46 +1,21 @@
-import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:http/http.dart' as http;
 
-class ProductPage extends StatefulWidget {
-  const ProductPage({super.key});
+Future<void> getProductByBarcode(String barcode) async {
+  final url = Uri.parse('http://192.168.120.55:8000/api/products/barcode/$barcode');
 
-  @override
-  _ProductPageState createState() => _ProductPageState();
-}
-
-class _ProductPageState extends State<ProductPage> {
-  List products = [];
-
-  @override
-  void initState() {
-    super.initState();
-    fetchProducts();
-  }
-
-  Future<void> fetchProducts() async {
-    final response = await http.get(Uri.parse('http://192.168.43.75:8000/api/products'));
+  try {
+    final response = await http.get(url);
 
     if (response.statusCode == 200) {
-      setState(() {
-        products = json.decode(response.body);
-      });
+      final data = json.decode(response.body);
+      print('Produk ditemukan: $data');
+    } else if (response.statusCode == 404) {
+      print('Produk tidak ditemukan');
     } else {
-      throw Exception('Gagal memuat produk');
+      print('Error: ${response.statusCode}');
     }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text("Produk")),
-      body: ListView.builder(
-        itemCount: products.length,
-        itemBuilder: (context, index) => ListTile(
-          title: Text(products[index]['name']),
-          subtitle: Text("Rp ${products[index]['price']}"),
-        ),
-      ),
-    );
+  } catch (e) {
+    print('Gagal terhubung ke API: $e');
   }
 }

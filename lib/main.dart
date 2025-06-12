@@ -12,6 +12,8 @@ void main() {
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -46,6 +48,8 @@ class MyApp extends StatelessWidget {
 }
 
 class MainScreen extends StatefulWidget {
+  const MainScreen({super.key});
+
   @override
   _MainScreenState createState() => _MainScreenState();
 }
@@ -61,7 +65,7 @@ class _MainScreenState extends State<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final List<Widget> _tabs = [
+    final List<Widget> tabs = [
       HistoryPage(onBackToHome: _goToHomeTab),
       Home(),
       SettingsPage(onBackToHome: _goToHomeTab),
@@ -69,7 +73,7 @@ class _MainScreenState extends State<MainScreen> {
 
     return Scaffold(
       backgroundColor: Colors.transparent,
-      body: _tabs[_currentIndex],
+      body: tabs[_currentIndex],
       bottomNavigationBar: Padding(
         padding: const EdgeInsets.symmetric(),
         child: ClipRRect(
@@ -114,6 +118,8 @@ class _MainScreenState extends State<MainScreen> {
 }
 
 class Home extends StatefulWidget {
+  const Home({super.key});
+
   @override
   _HomeState createState() => _HomeState();
 }

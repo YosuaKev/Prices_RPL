@@ -5,7 +5,7 @@ import 'package:url_launcher/url_launcher.dart';
 class SettingsPage extends StatefulWidget {
   final VoidCallback onBackToHome;
 
-  const SettingsPage({Key? key, required this.onBackToHome}) : super(key: key);
+  const SettingsPage({super.key, required this.onBackToHome});
 
   @override
   _SettingsPageState createState() => _SettingsPageState();
