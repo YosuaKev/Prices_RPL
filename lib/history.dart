@@ -4,7 +4,7 @@ import 'dart:convert';
 
 class HistoryPage extends StatefulWidget {
   final VoidCallback onBackToHome;
-  HistoryPage({required this.onBackToHome}); 
+  const HistoryPage({super.key, required this.onBackToHome}); 
   
   @override
   _HistoryPageState createState() => _HistoryPageState();
